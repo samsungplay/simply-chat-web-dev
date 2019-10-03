@@ -1,0 +1,382 @@
+<!DOCTYPE html> 
+<html>
+
+
+
+
+
+<head>
+
+    <title>SimplyChat Web Home</title>
+
+
+
+    <style>
+
+body {
+
+background-color:black;
+}
+
+
+
+    
+    
+    </style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<script>
+
+    $(document).ready(function() {
+
+        $("#createChannelBtn").click(function() {
+
+            $("#createChannelWindow").show();
+
+
+            
+
+        });
+
+    });
+
+    $(document).ready(function() {
+        $("#closeChannelWindowBtn").click(function() {
+
+            $("#createChannelWindow").hide();
+
+        });
+    });
+
+
+    $(document).ready(function() {
+        $("#closeChannelWindow").click(function() {
+
+            //create new channel
+
+            var channelName = $("#channelNameInput").val();
+
+            var channelDesc = $("#channelDescInput").val();
+
+
+
+
+            if(channelName.valueOf() === "")
+            {
+                $("#errorCode").text("Error: channel name is required");
+
+
+            }
+
+            else if(channelName.indexOf(":") != -1 || channelName.indexOf("-") != -1 || channelName.indexOf("#") != -1)
+            {
+                $("#errorCode").text("Error: channel name cannot contain special characters");
+            }
+
+            else
+
+            {
+
+
+                $("#createChannelWindow").hide();
+
+                $("#createChannelForm").submit();
+
+               
+
+
+
+
+
+            }
+            
+   
+
+
+
+
+   
+
+           
+
+
+
+        });
+
+
+       
+
+        $("#closeChannelDialogBtn").click(function() {
+            $("#closeChannelDialog").hide();
+        });
+
+        $("#closeChannelDialogNO").click(function() {
+   
+   $("#closeChannelDialog").hide();
+});
+
+         $("#closeChannelDialogOK").click(function() {
+
+            $("#closeChannelDialog").hide();
+            
+
+
+
+
+
+
+
+
+         });
+    });
+
+       
+
+
+
+    //work on close channel
+
+
+
+
+    function closeChannelOnClick(channelName,fromCurrentUser)
+    {
+
+        $("#closeChannelDialogchannelName").val(channelName);
+        $("#closeChannelDialogfromCurrentUser").val(fromCurrentUser);
+        $("#closeChannelDialog").show();
+
+    }
+
+    function closeChannelDialogReplyOnClick() {
+        $("#closeChannelDialogReply").hide();
+    }
+  
+
+
+
+
+</script>
+
+</head>
+
+<body>
+
+
+
+    <% if(locals.currentUser) {%>
+
+       
+        
+
+        <h1 style="color:white; font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; background-color:red;">Logged in as <%= currentUser %></h1>
+
+        <div display="block" style="text-align: right;">
+        <button  type="button" id="createChannelBtn" style="background-color:red; color:white;  font-size : 25px; width: 10cm; height : 2cm"> <b>+ CREATE NEW CHANNEL </b></button>
+        
+        </div>
+
+        <br/>
+        <br/>
+        <br/>
+
+
+
+
+        <dialog id="createChannelWindow" style="position:absolute; left:40%; width:50%; height:50%; background-color:white; border:1px solid cyan;">
+
+
+<div display="block" style="text-align:right;">  
+        <button id="closeChannelWindowBtn" type="button" style="background-color:red; color:white; font-size:15px; width:5cm; height:1cm;">Close</button>
+</div>
+           
+            <br/>
+        <h3 style="color:black; text-align:center; font-family:'Courier New', Courier, monospace;"> <b>CREATE NEW CHANNEL </b> </h3>
+          
+
+
+
+
+        <div display="block" style="text-align:center;" >
+
+        <form id="createChannelForm" action="/createChannelPost" method="POST">   
+
+            <input type="hidden" name="fromCurrentUser" value="<%= currentUser %>">
+            
+           Channel Name : <input style="padding:5px; border:3px solid red" type="text" name="channelNameInput" id="channelNameInput"> <br/>
+
+           <br/>
+           
+
+           Channel Desc.: <textarea style="padding:5px;" name="channelDescInput" rows="4" cols="50" id="channelDescInput" >  </textarea>
+     
+
+           <br/>
+
+
+
+           <h5 id="errorCode"></h5>
+
+
+
+
+        <button type="button" id="closeChannelWindow" style="background-color:red; color:white; font-size:15px; width:5cm; height:1cm;"> CREATE CHANNEL
+        </button>
+
+    </form>
+    </div>
+
+
+
+
+
+        </dialog>
+
+        <h1 style="color:white; background-color:red; font-family:'Courier New', Courier, monospace;">Channels:</h1>
+
+        <ul style="list-style-type:none;">
+
+
+
+            <% if(locals.channelData && locals.channelDescData ) { %>
+
+                <% for(let i=0; i<channelData.length; i++)  { %>
+              
+                    <div display="block" style="background-color:white; width: 40%; height: 10%; border:5px solid red;">   
+                    <li >
+                        <div display="block" style="text-align:center;" >
+                        <b style = "font-family : 'Courier New', Courier, monospace; font-size: 35px;" ><%= channelData[i] %>  </b>  <button id="closeChannelBtn" type="button" style="background-color:blue; position:absolute; left:15cm;" onclick="closeChannelOnClick( '<%= channelData[i] %>', '<%= currentUser %>' )"> X</button>
+                    </div>   
+                        <hr/>
+                         <small style= "font-family: 'Courier New', Courier, monospace; font-size: 15px; padding : 5px;">   <%= channelDescData[i] %></small>
+                   
+
+                         <br/>
+
+                         <form id="joinChannel" action="/channel" method="POST">
+                         <button id="joinChannelBtn" type="submit" style="background-color:red; width : 20%; height: 5%; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; font-size: 15px; color:white;"> Join Channel </button>
+                          <input type="hidden" name="channelName" value="<%= channelData[i] %>" >
+                          <input type="hidden" name="fromCurrentUser" value="<%= currentUser %>">
+
+
+                        </form>
+
+
+                    </li>
+
+                    </div>
+ 
+                    <br/>
+
+                    <br/>
+
+
+
+
+
+
+
+                    <% } %>
+
+
+
+
+
+
+
+                <% } %>
+
+            
+
+
+
+
+        </ul>
+
+
+
+        
+
+ 
+
+        
+        <dialog id="closeChannelDialog" style="width:20%; position:fixed; height:11%; background-color:white; border:3px solid cyan; top: 40%;">
+
+
+           
+            <form action="closeChannelPost" method="POST" >
+          
+            <div display="block">
+                <h5 style="font-size:15px; padding:1px; font-family: 'Courier New', Courier, monospace; text-align:center;"> Close this channel? </h5> 
+     
+             
+                <br/>
+     
+                <div display="block" style="text-align:center; "  >
+                <button id="closeChannelDiaogOK" type="submit" style="position:absolute; left:50px; background-color:green; color:white; font-size: 15px;">OK</button> 
+     
+
+                <button id="closeChannelDialogNO" type="button" style="position:relative; left:75px; background-color:green; color:white; font-size: 15px;">NO</button>
+                
+                </div>
+
+                
+     
+     
+                <input id="closeChannelDialogchannelName" type="hidden" name="channelName" value="">
+                <input id="closeChannelDialogfromCurrentUser" type="hidden" name="fromCurrentUser" value="">
+     
+            </div>
+
+        </form>
+             </dialog>
+
+
+
+
+
+             <dialog id="closeChannelDialogReply" style="width:20%; position:fixed; height:11%; background-color:white; border:3px solid cyan; top: 40%;">
+                    <h5 id="replyMessage" style="font-size:15px; padding:1px; font-family: 'Courier New', Courier, monospace; text-align:center;"> </h5> 
+     
+                    <div display="block" style="text-align:center; "  >
+
+                            <button onclick="closeChannelDialogReplyOnClick()" id="closeChannelDiaogReplyOK" type="button" style="background-color:green; color:white; font-size: 15px;">OK</button> 
+                 
+            
+                          
+                            </div>
+            
+            
+            </dialog>
+
+
+            <% if(locals.replyMessage)  { %>
+
+                <script>
+                    $("#replyMessage").text("<%= replyMessage %>") 
+                    $("#closeChannelDialogReply").show();
+                    
+                    </script>
+
+            
+
+
+
+                <% } %>
+
+
+         
+        
+
+    
+    <%  } %>
+    
+  
+
+
+
+
+    </body>
+</html> 

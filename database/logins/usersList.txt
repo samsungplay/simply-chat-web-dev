@@ -1,0 +1,2 @@
+samsungplay:password
+seconduser:password

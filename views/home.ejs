@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+
+
+
+<head>
+
+    <title> SimplyChat Web v1.0 </title>
+<style>  
+
+body {
+
+    background-color:black;
+}
+    
+    input.loginfield {
+        border-style : solid;
+        border-width : 3px;
+        border-color : red;
+
+        width : 50%;
+        height: 100%;
+
+
+
+
+
+    }
+
+     #loginForm {
+         text-align:center;
+     }
+
+     #loginFields {
+         padding: 225px;
+         
+     }
+
+        </style>
+
+
+
+
+        
+
+
+    
+
+</head>
+
+
+
+<body>
+
+
+    <h1 style="text-align:center; color:red; background-color:black;"> <b>SimplyChat Web v1.0<b> </h1>
+
+          
+         <img src="database/images/checkmark.jpg" alt="checkmark" height="100%" width="100%">
+
+
+
+
+        <div display="block" id="loginForm" >  
+
+        <form action="/loginPost" method="POST" id="loginFields">
+
+           Username: <input style="padding:15px; font-size: 15px; background-color:red; " class="loginfield" type="text" name="usernameField"/> <br/> <br/>
+
+            Password: <input style="padding:15px; font-size: 15px; background-color:red;" class="loginfield" type="password" name="passwordField"/>
+
+
+        <br/>
+
+
+
+
+        <% if(locals.errorCode)  {%>
+
+
+            <h5 id="errorCodeLabel" style="color:red;"><%= errorCode %></h5>
+
+            <script>
+
+       
+                    $("#errorCodeLabel").animate({left : '100px'},"fast");
+                    $("#errorCodeLabel").animate({right : '100px'},"fast");
+
+                    
+
+                
+            
+            </script>
+
+
+            <% } %>
+
+
+
+ 
+
+        <br/>
+
+
+            <button style="position:relative; background-color:red; height: 50px; width: 25%; right: 30px; font-family:'Courier New', Courier, monospace; font-size: 15px;" type="submit">Sign In</button>
+
+            <a style="text-decoration:underline; text-decoration-color:blue;" href="/register.html">  Need Account? </h5>
+        
+        </form>
+    </div>
+
+
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+    <script>
+
+       
+    
+    </script>
+
+
+
+
+
+
+
+</body>
+
+
+    
+
+
+
+
+
+
+</html>

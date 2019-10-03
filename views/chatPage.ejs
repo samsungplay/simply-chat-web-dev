@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+
+<html>
+
+<head>
+
+    <title>  <%= channelName %> </title>
+
+
+
+       <style>
+
+           body {
+
+               background-color: black;
+           }
+
+
+
+       
+       
+       </style>
+
+
+
+</head>
+
+
+<body>
+
+    <div id="localChannelName" data-localChannelName="<%= channelName %>"></div>
+    <div id="localUserName" data-localUserName="<%= currentUser %>"></div>
+
+
+
+       
+
+
+
+
+
+<button onclick="home()" type="button" style="background-color:black; font-family:'Courier New', Courier, monospace; width:200px; font-weight:500; height:25px; border:3px solid white; color:white;"> Back to home </button>
+
+<form id="pageData" action="/channelHome" method="POST"> 
+    <input type="hidden" value="<%= channelName %>" name="channelName">
+    <input type="hidden" value="<%= currentUser %>" name="currentUser">
+    <input id="isReply" type="hidden" value="false" name="isReply">
+
+
+</form>
+     
+<h1 style="background-color:red; color:white; font-family:'Courier New', Courier, monospace;"> <%= channelName %> </h1>
+
+
+
+<div style="display:flex; height: 500px; padding:50px;  border: 1px solid white;"  >  
+    <textarea id="chatLog" style="font-size: 15px; flex:1; background-color:black; color:green; font-family:'Courier New', Courier, monospace; border: 1px solid blue;" readonly id="chatLog" height="500px" row = "35" cols = "90" style="background-color: black; font-family:'Courier New', Courier, monospace;">
+
+   <%= chatLog %>
+       
+        
+            
+        
+        </textarea>  </div>
+
+<button onclick="sendUserMessageOnChannel('<%= currentUser %>','<%= channelName %>')" type="button" style="position:relative; right:10px; background-color:black; font-family: 'Courier New', Courier, monospace;   width:100px; height:25px; border:3px solid white; color:white;">Chat</button>         <input id="chatInput" type="text" size="200" style="background-color:red;"> 
+
+
+
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+<script>
+    
+
+    var socket;
+    var localSessionId = Math.floor(Math.random() * 100000000 + 1);
+
+
+ $(document).ready(function() {
+
+   
+
+
+
+    socket = io();
+
+   
+    
+
+
+    
+
+  
+
+   
+
+    
+
+    socket.emit('joinSignal','<%= channelName %>','<%= currentUser %>',localSessionId);
+
+
+
+    socket.on('joinSignal',(localChannelName,localUserName,sessionId) => {
+
+
+
+
+
+if(localChannelName.valueOf() === '<%= channelName %>')
+
+{
+
+
+ $("#chatLog").text($("#chatLog").text() +  ">_" + localUserName + " has joined the channel.\n");
+    
+
+    
+
+}
+
+
+
+});
+
+socket.on('cannotJoinSignal',(localChannelName,localUserName,sessionId) => {
+
+    $("#isReply").val(localSessionId);
+
+
+    if(localSessionId == sessionId) {
+
+    $("#isReply").val("true");
+
+    home();
+
+    }
+
+
+
+});
+
+socket.on('sendUserMessageOnChannel',(userName,channelName,message) => {
+
+    if(channelName.valueOf() === '<%= channelName %>')
+    {
+        $("#chatLog").text($("#chatLog").text() +  ">_" + userName +":" + message + "\n");
+
+
+    }
+
+});
+
+
+ });
+
+ 
+
+
+
+
+ 
+
+ function home()
+ {
+     //Log out function here
+
+
+    
+
+
+
+     
+
+
+ 
+     $("#pageData").submit();
+
+
+
+
+ }
+
+ function sendUserMessageOnChannel(userName,channelName)
+    {
+
+
+        
+
+
+
+
+
+
+
+        socket.emit('sendUserMessageOnChannel',userName,channelName,$("#chatInput").val());
+
+        $("#chatInput").val('');
+
+        
+
+
+        
+
+
+    }
+ 
+</script>
+
+</body>
+
+
+
+
+
+
+
+
+</html>
