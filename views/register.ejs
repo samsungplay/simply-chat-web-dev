@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>SimplyChat Web Register Page</title>
+
+    <style>
+
+body {
+
+background-color:darkgrey;
+}
+
+input.registerfield {
+    border-style : solid;
+    border-width : 3px;
+    border-color : blue;
+
+    width : 50%;
+    height: 100%;
+
+
+
+
+
+}
+
+ #registerForm {
+     text-align:center;
+ }
+
+ #registerFields {
+     padding: 225px;
+     
+ }
+    
+    </style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+
+       
+
+       
+
+        $(document).ready ( function () {
+    $(document).on ("click", "#registerBtn", function () {
+
+        console.log("Hello");
+
+       
+
+               var username = $("#registerUsernameField").val();
+
+              
+
+
+               var password = $("#registerPasswordField").val();
+
+
+               var repassword = $("#registerConfirmPasswordField").val();
+            
+               
+               if(username == "")
+               {
+                   $("#errorMessage").text("Username field is required!");
+
+
+               }
+
+               else if(password == "")
+               {
+                   $("#errorMessage").text("Password field is required!");
+
+
+               }
+
+               else if(repassword == "")
+               {
+                   $("#errorMessage").text("Confirm Password field is required!");
+
+
+    
+               }
+
+              else if(password != repassword) 
+               {
+
+                $("#errorMessage").text("Passwords don't match!");
+
+
+
+                
+
+
+
+               }
+
+               else 
+               {
+
+
+                $("#registerFields").submit();
+                   
+               }
+
+
+   
+
+
+                
+            
+
+
+        
+    });
+});
+    
+    </script>
+
+</head>
+
+
+
+
+<body>
+
+    <a href="/"> <- Back</a>
+
+
+
+    <div display="block" id="registerForm">
+
+        <form action="/registerPost" id="registerFields" method="POST">
+
+            Username : <input style="padding:15px; font-size: 15px; " type="text" class="registerfield" name="registerUsernameField" id="registerUsernameField"> <br/>
+            <br/>
+
+
+   
+            Password : <input style="padding:15px; font-size: 15px; " type="password" class="registerfield" name="registerPasswordField" id="registerPasswordField"> <br/>
+            <br/>
+            Confirm Password : <input style="padding:15px; font-size: 15px; " type="password" class="registerfield" name="registerConfirmPasswordField" id="registerConfirmPasswordField"> <br/>
+            <br/>
+            <br/>
+
+            <button style="position:relative; background-color:aqua; height: 50px; width: 25%; right: 30px; font-family:'Courier New', Courier, monospace; font-size: 15px;" type="button" id="registerBtn">Register</button>
+            
+               
+            <h5 id="errorMessage">  </h5>
+
+
+            <% if(locals.errorCode) { %>
+
+               
+                <h5 style="color:red;"> Error:   <%= errorCode  %>      </h5>
+
+
+
+                <% } %>
+
+
+
+
+
+
+
+
+
+
+
+
+        </form>
+
+
+
+
+    </div>
+
+
+
+
+
+   
+
+   
+
+
+
+</body>
+
+
+
+</html>
