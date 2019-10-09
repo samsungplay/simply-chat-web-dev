@@ -200,7 +200,7 @@
     });
 
 
-    var socket = io();
+    var socket;
     var localSessionId = Math.floor(Math.random() * 100000000 + 1);
 
 
@@ -212,7 +212,7 @@
 
 
 
-    socket = io();
+    socket = io('http://localhost');
 
    
     
