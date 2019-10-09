@@ -1,5 +1,3 @@
 samsungplay:password
 seconduser:password
-userTest:hello
-Chicken5:chicken5
-
+chicken:chicken
