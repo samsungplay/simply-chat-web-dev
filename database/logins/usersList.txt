@@ -1,2 +1,3 @@
 samsungplay:password
 seconduser:password
+chicken:chicken
