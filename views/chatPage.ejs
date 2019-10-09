@@ -206,13 +206,14 @@
 
 
 
+    var isInvalidSession = false;
 
 
    
 
 
 
-    socket = io('http://localhost');
+    socket = io();
 
    
     
@@ -232,7 +233,9 @@
     window.onbeforeunload = function()
 {
 
-    socket.emit('leaveSignal','<%= currentUser %>','<%= channelName %>');
+    socket.emit('leaveSignal','<%= currentUser %>','<%= channelName %>',isInvalidSession);
+
+
 
 
     
@@ -272,6 +275,8 @@ if(localChannelName.valueOf() === '<%= channelName %>')
 });
 
 socket.on('cannotJoinSignal',(localChannelName,localUserName,sessionId) => {
+
+    isInvalidSession = true;
 
     $("#isReply").val(localSessionId);
 

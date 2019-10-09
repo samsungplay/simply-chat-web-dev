@@ -861,12 +861,17 @@ io.on('connection',(socket) => {
         
     });
 
-    socket.on('leaveSignal',(userName,channelName) => {
+    socket.on('leaveSignal',(userName,channelName,isInvalidSession) => {
+
+        
+        if(!isInvalidSession) {
 
         onlineUsers[onlineUsers.indexOf(userName)] = "";
 
 
         io.emit('leaveSignal',userName,channelName);
+
+        }
     });
     
 });
