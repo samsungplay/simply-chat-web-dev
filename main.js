@@ -1,4 +1,6 @@
-const app = require('express')();
+const express = require('express');
+
+const app = express();
 
 const http = require('http').createServer(app);
 
@@ -27,7 +29,11 @@ var onlineUsers = [];
 app.use(bodyParser.urlencoded({extended : false}));
 
 
+
+
 app.set('view engine','ejs');
+
+app.use(express.static(__dirname+"/public"));
 
 
 
@@ -468,7 +474,16 @@ var channelFullName = "";
                 }
 
             
-            })
+            });
+
+           
+
+
+
+            
+
+
+
          });;
 
 
@@ -689,6 +704,107 @@ io.on('connection',(socket) => {
 
     console.log("Connection!");
 
+    socket.on('loadImage',(imageName,userName,channelName) => {
+
+    
+
+          // console.log("LOADING IMAGE...");
+
+            fs.readFile("database/uploadFiles/" + imageName,(err,data) => {
+
+                if(err)
+                throw err;
+
+                io.emit('loadImage',imageName,userName,channelName,data);
+
+               // console.log("IMAGE LOADED!");
+
+
+            });
+
+
+
+    });
+
+    socket.on('sendUserImageOnChannel',(userName,channelName,fileName,fileData) => {
+
+        fs.writeFile("database/uploadFiles/" + fileName,Buffer.from(fileData),(err) => {
+
+            if(err)
+            throw err;
+
+            fs.appendFile("database/chatLogs/" + channelName + ".txt",userName + "-" + fileName + "(image)\n",(err) => {
+
+                if(err)
+                throw err;
+
+                io.emit('sendUserImageOnChannel',userName,channelName,fileName,fileData);
+            });
+
+        });
+
+    });
+
+
+    socket.on('sendUserFileOnChannel',(userName,channelName,fileName,fileData) => {
+
+        fs.writeFile("database/uploadFiles/" + fileName,Buffer.from(fileData),(err) =>{
+            if(err)
+            throw err;
+
+            fs.appendFile("database/chatLogs/" + channelName + ".txt",userName + "-" + fileName + "(file)\n",(err) => {
+
+
+                if(err)
+                throw err;
+
+                io.emit('sendUserFileOnChannel',userName,channelName,fileName,fileData);
+
+
+            });
+
+
+
+            
+        });
+
+        
+
+    
+
+
+    });
+
+    socket.on('downloadFile',(userName,channelName,fileName) => {
+
+      fs.access("database/uploadFiles/" + fileName,(err) => {
+          if(err)
+          io.emit('downloadFileNotFound',userName,channelName,fileName);
+
+          
+        var readStream = fs.createReadStream("database/uploadFiles/" + fileName);
+          
+       
+
+        fs.readFile('database/uploadFiles/' + fileName,(err,data) => {
+
+            if(err)
+            throw err;
+
+            io.emit('downloadFile',userName,channelName,fileName,data);
+
+        });
+          
+        
+
+
+         
+
+      });
+
+
+    });
+
 
 
   
@@ -741,6 +857,14 @@ io.on('connection',(socket) => {
         io.emit('sendUserMessageOnChannel',userName,channelName,message);
 
         
+    });
+
+    socket.on('leaveSignal',(userName,channelName) => {
+
+        onlineUsers[onlineUsers.indexOf(userName)] = "";
+
+
+        io.emit('leaveSignal',userName,channelName);
     });
     
 });
@@ -885,14 +1009,20 @@ fs.access("database/chatLogs/" + channelName + ".txt", (err) => {
 
       else
       {
+
+        
           //Channel open
 
           var chatStream = fs.createReadStream("database/chatLogs/" + channelName + ".txt","utf8");
 
-  var chatLog = "";
+  
+
+  var chatLog = [];
 
   var rd = linereader.createInterface( {input : fs.createReadStream("database/chatLogs/" + channelName + ".txt"), 
 output : process.stdout      });
+
+
 
 
 rd.on('line',(line) => {
@@ -901,8 +1031,71 @@ rd.on('line',(line) => {
 
     var message = line.substring(line.indexOf("-")+1,line.indexOf("("));
 
+    var messageType = line.substring(line.indexOf("(")+1,line.length-1);
 
-    chatLog += ">_" + username + ":" + message + "\n";
+
+    if(messageType.valueOf() === "message")
+    {
+        chatLog.push("message>_" + username + ":" + message);
+
+    }
+    else if(messageType.valueOf() === "file")
+    {
+        chatLog.push("file>_" + username + ":" + message);
+    }
+    else if(messageType.valueOf() === "image")
+    {
+
+        
+       
+
+
+      var dataRaw = fs.readFileSync("database/uploadFiles/" + message);
+
+
+       
+         
+
+
+
+
+         var data =  String.fromCharCode.apply(null,new Uint16Array(dataRaw));
+          
+
+
+
+//from here
+
+            chatLog.push("image>_" + username + ":" + message);
+
+            
+
+
+
+
+
+
+           
+
+    
+
+        
+
+
+       
+      
+
+
+
+       
+    }
+    
+
+
+    
+
+    
+
 
 
 
@@ -911,9 +1104,15 @@ rd.on('line',(line) => {
 
 }).on('close',() => {
 
-    console.log("CHATLOG_" + chatLog);
+  
 
-    res.render("chatPage",{channelName : channelName,currentUser : fromCurrentUser,chatLog : chatLog});
+    var invitationCode = Number.parseInt(channelName.substring(channelName.indexOf("-")+1));
+
+
+
+
+
+    res.render("chatPage",{channelName : channelName,currentUser : fromCurrentUser,chatLog : chatLog, invitationCode : invitationCode});
 
 
 
@@ -1337,6 +1536,8 @@ app.post('/channelHome',(req,res) => {
     var currentUser = req.body.currentUser;
     var isReply = req.body.isReply;
 
+    
+
 
     if(isReply.valueOf() === "true")
     {
@@ -1354,6 +1555,150 @@ app.post('/channelHome',(req,res) => {
     }
 
     
+
+});
+
+
+
+
+app.post('/joinChannelPost',(req,res) => {
+    var fromCurrentUser = req.body.fromCurrentUser;
+
+    var invitationCode = req.body.invitationCode;
+
+
+    var isChannelAlreadyJoined = false;
+
+   var prerd = linereader.createInterface( {
+       input : fs.createReadStream("database/users/" + fromCurrentUser + ".txt","utf8"),
+
+       output : process.stdout
+
+
+
+
+   });
+
+   prerd.on('line',(line) => {
+       var channelCode = line.substring(line.indexOf("-",9)+1,line.indexOf("("));
+
+       if(channelCode.valueOf() === invitationCode.valueOf()) {
+       isChannelAlreadyJoined = true;
+
+       renderChannelList(fromCurrentUser,res,true,"You are already in this channel");
+
+       }
+
+   }).on('close',() => {
+       if(!isChannelAlreadyJoined)
+       {
+
+
+        var rd = linereader.createInterface( {
+            input : fs.createReadStream("database/channels/channels.txt","utf8"),
+    
+            output : process.stdout
+    
+    
+        });
+    
+    
+        var isChannelFound = false;
+    
+    
+    
+        rd.on('line',(line) => {
+    
+            //Matching invitation code
+    
+            if(line.substring(line.lastIndexOf("-")+1,line.lastIndexOf(":")).valueOf() === invitationCode.valueOf())
+            {
+    
+                isChannelFound = true;
+    
+                
+                var channelName = line.substring(0,line.length-1);
+    
+                fs.appendFile("database/users/" + fromCurrentUser + ".txt","channel-" + channelName + "(user)",(err) => {
+                    if(err)
+                    throw err;
+    
+    
+    
+    
+                    renderChannelList(fromCurrentUser,res,true,"Successfully joined channel:\n " + channelName);
+    
+    
+                
+    
+    
+    
+                });
+    
+    
+    
+    
+            }
+    
+        }).on('close',()=> {
+    
+            if(!isChannelFound)
+            {
+    
+                renderChannelList(fromCurrentUser,res,true,"Could not find channel");
+    
+            }
+    
+        });
+
+
+
+
+
+
+
+       }
+
+     
+       
+
+   });
+
+
+    
+    
+    
+
+
+
+
+
+
+
+    
+
+
+    
+
+    
+
+
+
+
+
+});
+
+app.post("/logoutPost",(req,res) => {
+    var fromCurrentUser = req.body.fromCurrentUser;
+
+
+
+    onlineUsers[onlineUsers.indexOf(fromCurrentUser)] = "";
+
+
+    res.render("home");
+
+
 
 });
 

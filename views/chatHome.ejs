@@ -6,6 +6,11 @@
 
 
 <head>
+        <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+        
+        
 
     <title>SimplyChat Web Home</title>
 
@@ -16,7 +21,53 @@
 body {
 
 background-color:black;
+
+
+
 }
+
+
+.ui-widget {
+   font-family:'Courier New', Courier, monospace;
+
+   font-size: 15px;
+
+   font-weight : bold;
+
+   
+   
+}
+
+.ui-widget-content {
+    background : black;
+
+    border : 1px solid red;
+
+    color:white;
+
+
+
+
+}
+
+.ui-widget-header {
+    background : red;
+
+    color:white;
+
+
+}
+
+
+.dialog-buttons {
+    background : red;
+
+    color:white;
+}
+
+
+
+
 
 
 
@@ -24,12 +75,15 @@ background-color:black;
     
     </style>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 
 <script>
 
+
+
     $(document).ready(function() {
+
+
 
         $("#createChannelBtn").click(function() {
 
@@ -39,6 +93,9 @@ background-color:black;
             
 
         });
+
+
+
 
     });
 
@@ -130,11 +187,91 @@ background-color:black;
 
 
          });
+
+
+
+
+
+
+         
+         $("#joinChannelDialog").dialog( {
+
+            autoOpen : false,
+            
+            
+
+
+            title : "Join an existing channel",
+
+            buttons: {  Ok :  function() {
+
+                var invitationCode = $("#invitationCodeInput").val();
+
+                if(invitationCode.length < 1) {
+
+                    $("#message").text("Please enter a valid invitation code");
+
+
+
+
+                    $("#messageDialog").dialog("open");
+
+
+                    
+
+                }
+
+
+                else {
+$("#invitationCode").val(invitationCode);
+
+
+
+
+$("#joinChannelData").submit();  
+
+                }
+
+                $(this).dialog("close"); 
+                
+                
+                  }    },
+
+
+            draggable : false
+
+           
+
+           
+
+
+            
+
+
+
+
+         });
+
+       
+
+         $("#messageDialog").dialog( { 
+             autoOpen : false,
+
+             title : "Error",
+
+            buttons : {
+                Ok : function() {  $(this).dialog("close") }
+            },
+
+            draggable : false,
+
+         
+         });
     });
 
        
 
-
+  
 
     //work on close channel
 
@@ -156,6 +293,30 @@ background-color:black;
   
 
 
+     function joinChannelAtCode()
+    {
+
+        $("#joinChannelDialog").dialog("open");
+
+    
+
+
+
+        
+         
+
+     }
+
+     function Logout()
+     {
+
+        $("#logoutUsername")
+
+
+         $("#logoutData").submit();
+
+     }
+
 
 
 </script>
@@ -164,11 +325,27 @@ background-color:black;
 
 <body>
 
+    
 
+    <div id = "messageDialog">   <p id="message">  </p>
+    </div>
 
+    <div id="joinChannelDialog">  Please Enter the invitation code: 
+            <br/>
+
+            <input type="text" id="invitationCodeInput" size="30">
+    </div>
+
+   
     <% if(locals.currentUser) {%>
 
-       
+        <button onclick="Logout()" type="button" style="background-color:red;font-size:15px;font-family:'Courier New', Courier, monospace;border:solid 3px white;color:white;">Logout</button>
+    <form action="/logoutPost" method="POST" id="logoutData"> 
+        <input id="logoutUsername" type="hidden" name="username" val="<%= currentUser %>">
+
+    
+    </form>
+
         
 
         <h1 style="color:white; font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; background-color:red;">Logged in as <%= currentUser %></h1>
@@ -176,6 +353,20 @@ background-color:black;
         <div display="block" style="text-align: right;">
         <button  type="button" id="createChannelBtn" style="background-color:red; color:white;  font-size : 25px; width: 10cm; height : 2cm"> <b>+ CREATE NEW CHANNEL </b></button>
         
+
+        <button onclick="joinChannelAtCode()" type="button" id="joinChannelBtn" style="background-color:red; color:white; font-size:25px; width:10cm; height:2cm; position:relative; left:25px;">
+
+            JOIN AN EXISTING CHANNEL
+
+
+        
+        </button>
+
+        <form id="joinChannelData" action="/joinChannelPost" method="POST">
+            <input type="hidden" name="fromCurrentUser" value = "<%= currentUser %>">
+            <input type="hidden" id="invitationCode" name="invitationCode" value="">
+        </form>
+
         </div>
 
         <br/>
@@ -186,6 +377,7 @@ background-color:black;
 
 
         <dialog id="createChannelWindow" style="position:absolute; left:40%; width:50%; height:50%; background-color:white; border:1px solid cyan;">
+
 
 
 <div display="block" style="text-align:right;">  
